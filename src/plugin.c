@@ -221,6 +221,59 @@ static Value fn_インベントリ数量取得(int argc, Value* args) {
     return (i >= 0 && i < g_inv_len) ? NUM(g_inv_cnts[i]) : NUM(0);
 }
 
+/* ── v1.3.0 追加 ───────────────────────────────────────*/
+
+/* パーティ */
+static Value fn_パーティクリア(int argc, Value* args)   { (void)argc;(void)args; rpg_party_clear(); return NUL; }
+static Value fn_パーティ追加(int argc, Value* args)     { return BVAL(rpg_party_add(ARG_INT(0))); }
+static Value fn_パーティ除外(int argc, Value* args)     { return BVAL(rpg_party_remove(ARG_INT(0))); }
+static Value fn_パーティ人数(int argc, Value* args)     { (void)argc;(void)args; return NUM(rpg_party_size()); }
+static Value fn_パーティ取得(int argc, Value* args)     { return NUM(rpg_party_get(ARG_INT(0))); }
+static Value fn_パーティ確認(int argc, Value* args)     { return BVAL(rpg_party_has(ARG_INT(0))); }
+
+/* アクターステータス設定 */
+static Value fn_キャラステータス設定(int argc, Value* args) {
+    return BVAL(rpg_actor_set_stat(ARG_INT(0), ARG_STR(1), ARG_INT(2)));
+}
+
+/* アイテム使用 */
+static Value fn_アイテム使用(int argc, Value* args) {
+    return BVAL(rpg_item_use(ARG_INT(0), ARG_INT(1)));
+}
+
+/* 敵AI */
+static Value fn_敵自動行動(int argc, Value* args) {
+    return NUM(rpg_battle_enemy_auto_action(&g_battle, ARG_INT(0)));
+}
+
+/* ノベル: 背景 */
+static Value fn_ノベル背景設定(int argc, Value* args)  { rpg_novel_set_bg(ARG_STR(0)); return NUL; }
+static Value fn_ノベル背景取得(int argc, Value* args)  { (void)argc;(void)args; return hajimu_string(rpg_novel_get_bg()); }
+
+/* ノベル: キャラクター */
+static Value fn_ノベルキャラ設定(int argc, Value* args) {
+    rpg_novel_set_char(ARG_INT(0), ARG_STR(1), argc>2?ARG_STR(2):""); return NUL;
+}
+static Value fn_ノベルキャラパス(int argc, Value* args)  { return hajimu_string(rpg_novel_get_char_path(ARG_INT(0))); }
+static Value fn_ノベルキャラ表情(int argc, Value* args)  { return hajimu_string(rpg_novel_get_char_expr(ARG_INT(0))); }
+static Value fn_ノベルキャラクリア(int argc, Value* args){ rpg_novel_clear_char(ARG_INT(0)); return NUL; }
+
+/* ノベル: モード */
+static Value fn_ノベルオート設定(int argc, Value* args)   { rpg_novel_set_auto(ARG_B(0)); return NUL; }
+static Value fn_ノベルオート取得(int argc, Value* args)   { (void)argc;(void)args; return BVAL(rpg_novel_get_auto()); }
+static Value fn_ノベルスキップ設定(int argc, Value* args) { rpg_novel_set_skip(ARG_B(0)); return NUL; }
+static Value fn_ノベルスキップ取得(int argc, Value* args) { (void)argc;(void)args; return BVAL(rpg_novel_get_skip()); }
+static Value fn_ノベルオート間隔設定(int argc, Value* args){ rpg_novel_set_auto_delay(ARG_F(0)); return NUL; }
+static Value fn_ノベルオート間隔取得(int argc, Value* args){ (void)argc;(void)args; return NUM(rpg_novel_get_auto_delay()); }
+
+/* ノベル: バックログ */
+static Value fn_ノベルログ追加(int argc, Value* args) {
+    rpg_novel_backlog_push(ARG_STR(0), ARG_STR(1)); return NUL;
+}
+static Value fn_ノベルログ件数(int argc, Value* args) { (void)argc;(void)args; return NUM(rpg_novel_backlog_count()); }
+static Value fn_ノベルログ話者(int argc, Value* args)  { return hajimu_string(rpg_novel_backlog_speaker(ARG_INT(0))); }
+static Value fn_ノベルログテキスト(int argc, Value* args){ return hajimu_string(rpg_novel_backlog_text(ARG_INT(0))); }
+
 /* ── プラグイン登録 ─────────────────────────────────────*/
 #define FN(name, mn, mx) { #name, fn_##name, mn, mx }
 
@@ -274,12 +327,41 @@ static HajimuPluginFunc funcs[] = {
     FN(インベントリ更新,      0, 0),
     FN(インベントリアイテムID, 1, 1),
     FN(インベントリ数量取得,   1, 1),
+    /* v1.3.0 パーティ */
+    FN(パーティクリア,     0, 0),
+    FN(パーティ追加,       1, 1),
+    FN(パーティ除外,       1, 1),
+    FN(パーティ人数,       0, 0),
+    FN(パーティ取得,       1, 1),
+    FN(パーティ確認,       1, 1),
+    /* v1.3.0 アクター/アイテム */
+    FN(キャラステータス設定, 3, 3),
+    FN(アイテム使用,         2, 2),
+    /* v1.3.0 敵AI */
+    FN(敵自動行動,           1, 1),
+    /* v1.3.0 ノベル */
+    FN(ノベル背景設定,         1, 1),
+    FN(ノベル背景取得,         0, 0),
+    FN(ノベルキャラ設定,       2, 3),
+    FN(ノベルキャラパス,       1, 1),
+    FN(ノベルキャラ表情,       1, 1),
+    FN(ノベルキャラクリア,     1, 1),
+    FN(ノベルオート設定,       1, 1),
+    FN(ノベルオート取得,       0, 0),
+    FN(ノベルスキップ設定,     1, 1),
+    FN(ノベルスキップ取得,     0, 0),
+    FN(ノベルオート間隔設定,   1, 1),
+    FN(ノベルオート間隔取得,   0, 0),
+    FN(ノベルログ追加,         2, 2),
+    FN(ノベルログ件数,         0, 0),
+    FN(ノベルログ話者,         1, 1),
+    FN(ノベルログテキスト,     1, 1),
 };
 
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_rpg",
-        .version        = "1.2.0",
+        .version        = "1.3.0",
         .author         = "Reo Shiozawa",
         .description    = "はじむ用RPGエンジン (バトル/DB/ダイアログ/セーブ/ゴールド/状態異常/選択肢/装備/スキル/HP回復)",
         .functions      = funcs,

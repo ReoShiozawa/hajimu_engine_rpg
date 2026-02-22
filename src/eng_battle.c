@@ -184,3 +184,26 @@ int rpg_battle_next_actor(RPG_Battle* b) {
     b->turn++;
     return best_id;
 }
+
+/* ── 敵 AI 自動行動 ─────────────────────────────────────*/
+/* 最も高速 (SPD) な生存パーティメンバーをランダムに攻撃する。
+ * 戻り値: ダメージ量 (0=実行不可)。 */
+int rpg_battle_enemy_auto_action(RPG_Battle* b, int enemy_id) {
+    if (!b || b->state != RPG_BATTLE_RUNNING) return 0;
+    RPG_Actor* attacker = rpg_actor_get(enemy_id);
+    if (!attacker || !attacker->alive) return 0;
+
+    /* 生存パーティメンバーを収集 */
+    int alive_party[RPG_PARTY_MAX];
+    int alive_count = 0;
+    for (int i = 0; i < b->party_size; i++) {
+        RPG_Actor* a = rpg_actor_get(b->party[i]);
+        if (a && a->alive) alive_party[alive_count++] = b->party[i];
+    }
+    if (alive_count == 0) return 0;
+
+    /* ランダムにターゲット選択 */
+    int target_id = alive_party[rand() % alive_count];
+    rpg_battle_do_action(b, enemy_id, RPG_ACT_ATTACK, target_id, 0);
+    return b->last_damage;
+}

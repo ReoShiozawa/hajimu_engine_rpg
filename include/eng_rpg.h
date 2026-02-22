@@ -300,6 +300,66 @@ int  rpg_equip_get(int actor_id, RPG_EquipSlot slot);
  */
 void rpg_equip_apply_stats(int actor_id);
 
+/* ======================== パーティ管理 (v1.3.0) ======================== */
+
+/** パーティの全メンバーをクリアする。 */
+void rpg_party_clear(void);
+/** アクターをパーティに追加 (最大8人)。成功時true。 */
+bool rpg_party_add(int actor_id);
+/** アクターをパーティから除外。成功時true。 */
+bool rpg_party_remove(int actor_id);
+/** 現在のパーティ人数。 */
+int  rpg_party_size(void);
+/** index番目のパーティメンバーのactor_idを返す (0=範囲外)。 */
+int  rpg_party_get(int index);
+/** アクターがパーティに存在するか。 */
+bool rpg_party_has(int actor_id);
+
+/* ======================== アクターステータス設定 (v1.3.0) ======================== */
+
+/** ステータス名 ("hp","mp","atk","def","spd","luk","max_hp","max_mp","level","exp")で値を設定。 */
+bool rpg_actor_set_stat(int actor_id, const char* stat, int value);
+
+/* ======================== アイテム使用 (v1.3.0) ======================== */
+
+/** インベントリからitem_idを1個消費してactor_idに効果を適用する。 */
+bool rpg_item_use(int actor_id, int item_id);
+
+/* ======================== 敵 AI (v1.3.0) ======================== */
+
+/** 敵 enemy_id が生存パーティメンバーをランダムに攻撃する。戻り値: ダメージ量。 */
+int rpg_battle_enemy_auto_action(RPG_Battle* b, int enemy_id);
+
+/* ======================== ビジュアルノベル (v1.3.0) ======================== */
+
+/** 背景画像パスを設定/取得する。 */
+void        rpg_novel_set_bg(const char* path);
+const char* rpg_novel_get_bg(void);
+
+/** キャラクタースプライト: slot=0(左),1(中央),2(右)。path=画像パス、expr=表情タグ。 */
+void        rpg_novel_set_char(int slot, const char* path, const char* expr);
+const char* rpg_novel_get_char_path(int slot);
+const char* rpg_novel_get_char_expr(int slot);
+void        rpg_novel_clear_char(int slot);
+
+/** オート進行モード (true で自動ページめくり)。 */
+void  rpg_novel_set_auto(bool on);
+bool  rpg_novel_get_auto(void);
+
+/** スキップモード (true で即座にテキスト全表示)。 */
+void  rpg_novel_set_skip(bool on);
+bool  rpg_novel_get_skip(void);
+
+/** オート進行の待機時間 (秒)。デフォルト 2.0。 */
+void  rpg_novel_set_auto_delay(float seconds);
+float rpg_novel_get_auto_delay(void);
+
+/** バックログ管理 (直近 16 件)。 */
+void        rpg_novel_backlog_push(const char* speaker, const char* text);
+int         rpg_novel_backlog_count(void);
+const char* rpg_novel_backlog_speaker(int i);  /* i=0 が最古 */
+const char* rpg_novel_backlog_text(int i);
+
 #ifdef __cplusplus
 }
 #endif
