@@ -156,6 +156,40 @@ static Value fn_ロード(int argc, Value* args)        { return BVAL(rpg_load(A
 static Value fn_セーブ存在確認(int argc, Value* args) { return BVAL(rpg_save_exists(ARG_INT(0))); }
 static Value fn_セーブ削除(int argc, Value* args)    { rpg_save_delete(ARG_INT(0)); return NUL; }
 
+/* ── ゴールド ────────────────────────────────────────────*/
+static Value fn_ゴールド取得(int argc, Value* args) { return NUM(rpg_gold_get()); }
+static Value fn_ゴールド設定(int argc, Value* args) { rpg_gold_set(ARG_INT(0)); return NUL; }
+static Value fn_ゴールド加算(int argc, Value* args) { rpg_gold_add(ARG_INT(0)); return NUL; }
+static Value fn_ゴールド消費(int argc, Value* args) { return BVAL(rpg_gold_spend(ARG_INT(0))); }
+
+/* ── ショップ ────────────────────────────────────────────*/
+static Value fn_アイテム購入(int argc, Value* args) { return BVAL(rpg_shop_buy(ARG_INT(0),ARG_INT(1))); }
+static Value fn_アイテム売却(int argc, Value* args) { return BVAL(rpg_shop_sell(ARG_INT(0),ARG_INT(1))); }
+
+/* ── 状態異常 ────────────────────────────────────────────*/
+static Value fn_状態異常追加(int argc, Value* args) { rpg_actor_add_status(ARG_INT(0),(RPG_Status)ARG_INT(1)); return NUL; }
+static Value fn_状態異常取得(int argc, Value* args) { return NUM(rpg_actor_get_status(ARG_INT(0))); }
+static Value fn_状態異常確認(int argc, Value* args) { return BVAL(rpg_actor_has_status(ARG_INT(0),(RPG_Status)ARG_INT(1))); }
+static Value fn_状態異常回復(int argc, Value* args) { rpg_actor_cure_status(ARG_INT(0),(RPG_Status)ARG_INT(1)); return NUL; }
+static Value fn_状態異常全回復(int argc, Value* args){ rpg_actor_cure_all_status(ARG_INT(0)); return NUL; }
+static Value fn_状態異常経過(int argc, Value* args) { return NUM(rpg_status_tick(ARG_INT(0))); }
+
+/* ── 選択肢 ─────────────────────────────────────────────*/
+/* シングルトン RPG_ChoiceMenu を使う */
+RPG_ChoiceMenu* rpg_global_choice(void);  /* eng_extra.c から */
+static Value fn_選択肢初期化(int argc, Value* args) { rpg_choice_init(rpg_global_choice()); return NUL; }
+static Value fn_選択肢追加(int argc, Value* args)   { rpg_choice_add(rpg_global_choice(), ARG_STR(0)); return NUL; }
+static Value fn_選択肢選択(int argc, Value* args)   { rpg_choice_select(rpg_global_choice(), ARG_INT(0)); return NUL; }
+static Value fn_選択肢アクティブ(int argc, Value* args){ return BVAL(rpg_choice_is_active(rpg_global_choice())); }
+static Value fn_選択済(int argc, Value* args)       { return NUM(rpg_choice_selected(rpg_global_choice())); }
+static Value fn_選択肢テキスト(int argc, Value* args){ return STR(rpg_choice_text(rpg_global_choice(), ARG_INT(0))); }
+static Value fn_選択肢数(int argc, Value* args)     { return NUM(rpg_choice_count(rpg_global_choice())); }
+
+/* ── 装備 ────────────────────────────────────────────────*/
+static Value fn_装備設定(int argc, Value* args)       { rpg_equip_set(ARG_INT(0),(RPG_EquipSlot)ARG_INT(1),ARG_INT(2)); return NUL; }
+static Value fn_装備取得(int argc, Value* args)       { return NUM(rpg_equip_get(ARG_INT(0),(RPG_EquipSlot)ARG_INT(1))); }
+static Value fn_装備ステータス適用(int argc, Value* args){ rpg_equip_apply_stats(ARG_INT(0)); return NUL; }
+
 /* ── プラグイン登録 ─────────────────────────────────────*/
 #define FN(name, mn, mx) { #name, fn_##name, mn, mx }
 
@@ -186,14 +220,29 @@ static HajimuPluginFunc funcs[] = {
     /* セーブ/ロード */
     FN(セーブ,   1, 1), FN(ロード,   1, 1),
     FN(セーブ存在確認, 1, 1), FN(セーブ削除, 1, 1),
+    /* ゴールド */
+    FN(ゴールド取得, 0, 0), FN(ゴールド設定, 1, 1),
+    FN(ゴールド加算, 1, 1), FN(ゴールド消費, 1, 1),
+    /* ショップ */
+    FN(アイテム購入, 2, 2), FN(アイテム売却, 2, 2),
+    /* 状態異常 */
+    FN(状態異常追加,   2, 2), FN(状態異常取得,   1, 1),
+    FN(状態異常確認,   2, 2), FN(状態異常回復,   2, 2),
+    FN(状態異常全回復, 1, 1), FN(状態異常経過,   1, 1),
+    /* 選択肢 */
+    FN(選択肢初期化, 0, 0), FN(選択肢追加, 1, 1), FN(選択肢選択, 1, 1),
+    FN(選択肢アクティブ, 0, 0), FN(選択済, 0, 0),
+    FN(選択肢テキスト, 1, 1), FN(選択肢数, 0, 0),
+    /* 装備 */
+    FN(装備設定, 3, 3), FN(装備取得, 2, 2), FN(装備ステータス適用, 1, 1),
 };
 
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_rpg",
-        .version        = "1.0.0",
+        .version        = "1.1.0",
         .author         = "Reo Shiozawa",
-        .description    = "はじむ用RPGエンジン (バトル/DB/ダイアログ/セーブ)",
+        .description    = "はじむ用RPGエンジン (バトル/DB/ダイアログ/セーブ/ゴールド/状態異常/選択肢/装備)",
         .functions      = funcs,
         .function_count = sizeof(funcs) / sizeof(funcs[0]),
     };

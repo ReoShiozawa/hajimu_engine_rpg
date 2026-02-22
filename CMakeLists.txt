@@ -12,6 +12,7 @@ add_library(engine_rpg SHARED
     src/eng_battle.c
     src/eng_dialog.c
     src/eng_save.c
+    src/eng_extra.c
     src/plugin.c
 )
 
