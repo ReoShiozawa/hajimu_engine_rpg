@@ -190,6 +190,37 @@ static Value fn_装備設定(int argc, Value* args)       { rpg_equip_set(ARG_IN
 static Value fn_装備取得(int argc, Value* args)       { return NUM(rpg_equip_get(ARG_INT(0),(RPG_EquipSlot)ARG_INT(1))); }
 static Value fn_装備ステータス適用(int argc, Value* args){ rpg_equip_apply_stats(ARG_INT(0)); return NUL; }
 
+/* ── スキル習得/忘却 ────────────────────────────────────*/
+static Value fn_スキル習得(int argc, Value* args)      { rpg_actor_learn_skill(ARG_INT(0),ARG_INT(1)); return NUL; }
+static Value fn_スキル忘却(int argc, Value* args)      { rpg_actor_forget_skill(ARG_INT(0),ARG_INT(1)); return NUL; }
+static Value fn_スキル習得確認(int argc, Value* args)  { return BVAL(rpg_actor_has_skill(ARG_INT(0),ARG_INT(1))); }
+
+/* ── HP/MP 回復 ─────────────────────────────────────────*/
+static Value fn_HP回復(int argc, Value* args) { rpg_actor_heal_hp(ARG_INT(0),ARG_INT(1)); return NUL; }
+static Value fn_MP回復(int argc, Value* args) { rpg_actor_heal_mp(ARG_INT(0),ARG_INT(1)); return NUL; }
+
+/* ── インベントリ一覧 ────────────────────────────────────
+ * インベントリ更新() でキャッシュを構築し件数を返す。
+ * その後 インベントリアイテムID(i), インベントリ数量取得(i) で参照。
+ */
+#define INV_BUF_MAX 64
+static int g_inv_ids[INV_BUF_MAX];
+static int g_inv_cnts[INV_BUF_MAX];
+static int g_inv_len = 0;
+
+static Value fn_インベントリ更新(int argc, Value* args) {
+    g_inv_len = rpg_inventory_list(g_inv_ids, g_inv_cnts, INV_BUF_MAX);
+    return NUM(g_inv_len);
+}
+static Value fn_インベントリアイテムID(int argc, Value* args) {
+    int i = ARG_INT(0);
+    return (i >= 0 && i < g_inv_len) ? NUM(g_inv_ids[i]) : NUM(-1);
+}
+static Value fn_インベントリ数量取得(int argc, Value* args) {
+    int i = ARG_INT(0);
+    return (i >= 0 && i < g_inv_len) ? NUM(g_inv_cnts[i]) : NUM(0);
+}
+
 /* ── プラグイン登録 ─────────────────────────────────────*/
 #define FN(name, mn, mx) { #name, fn_##name, mn, mx }
 
@@ -235,14 +266,22 @@ static HajimuPluginFunc funcs[] = {
     FN(選択肢テキスト, 1, 1), FN(選択肢数, 0, 0),
     /* 装備 */
     FN(装備設定, 3, 3), FN(装備取得, 2, 2), FN(装備ステータス適用, 1, 1),
+    /* スキル習得/忘却 */
+    FN(スキル習得,    2, 2), FN(スキル忘却,    2, 2), FN(スキル習得確認, 2, 2),
+    /* HP/MP 回復 */
+    FN(HP回復, 2, 2), FN(MP回復, 2, 2),
+    /* インベントリ一覧 */
+    FN(インベントリ更新,      0, 0),
+    FN(インベントリアイテムID, 1, 1),
+    FN(インベントリ数量取得,   1, 1),
 };
 
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_rpg",
-        .version        = "1.1.0",
+        .version        = "1.2.0",
         .author         = "Reo Shiozawa",
-        .description    = "はじむ用RPGエンジン (バトル/DB/ダイアログ/セーブ/ゴールド/状態異常/選択肢/装備)",
+        .description    = "はじむ用RPGエンジン (バトル/DB/ダイアログ/セーブ/ゴールド/状態異常/選択肢/装備/スキル/HP回復)",
         .functions      = funcs,
         .function_count = sizeof(funcs) / sizeof(funcs[0]),
     };

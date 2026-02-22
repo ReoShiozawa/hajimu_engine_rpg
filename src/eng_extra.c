@@ -169,3 +169,40 @@ void rpg_equip_apply_stats(int actor_id) {
 
 /* グローバル選択肢メニューへのアクセサ (plugin.c から使用) */
 RPG_ChoiceMenu* rpg_global_choice(void) { return &g_choice_menu; }
+
+/* ======================== スキル習得/忘却 ======================== */
+/* 64bit マスクでアクターごとのスキル習得状態を管理 (skill_id % 64) */
+
+static uint64_t g_actor_skills[RPG_MAX_ACTORS + 1]; /* [0] 未使用 */
+
+void rpg_actor_learn_skill(int actor_id, int skill_id) {
+    if (actor_id < 1 || actor_id > RPG_MAX_ACTORS || skill_id < 0) return;
+    g_actor_skills[actor_id] |= (1ULL << (skill_id % 64));
+}
+
+void rpg_actor_forget_skill(int actor_id, int skill_id) {
+    if (actor_id < 1 || actor_id > RPG_MAX_ACTORS || skill_id < 0) return;
+    g_actor_skills[actor_id] &= ~(1ULL << (skill_id % 64));
+}
+
+bool rpg_actor_has_skill(int actor_id, int skill_id) {
+    if (actor_id < 1 || actor_id > RPG_MAX_ACTORS || skill_id < 0) return false;
+    return (g_actor_skills[actor_id] >> (skill_id % 64)) & 1ULL;
+}
+
+/* ======================== HP/MP 回復 ======================== */
+
+void rpg_actor_heal_hp(int actor_id, int amount) {
+    RPG_Actor* a = rpg_actor_get(actor_id);
+    if (!a || amount <= 0) return;
+    a->hp += amount;
+    if (a->hp > a->max_hp) a->hp = a->max_hp;
+    if (a->hp > 0) a->alive = true;
+}
+
+void rpg_actor_heal_mp(int actor_id, int amount) {
+    RPG_Actor* a = rpg_actor_get(actor_id);
+    if (!a || amount <= 0) return;
+    a->mp += amount;
+    if (a->mp > a->max_mp) a->mp = a->max_mp;
+}

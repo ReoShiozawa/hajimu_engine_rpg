@@ -80,6 +80,8 @@ void rpg_inventory_add(int item_id, int count);
 void rpg_inventory_remove(int item_id, int count);
 int  rpg_inventory_count(int item_id);
 bool rpg_inventory_has(int item_id);
+/** 全インベントリを列挙。out_item_ids/out_counts に書き込み、件数を返す。 */
+int  rpg_inventory_list(int* out_item_ids, int* out_counts, int max);
 
 /* ======================== バトル ======================== */
 
@@ -218,6 +220,22 @@ bool rpg_shop_buy(int item_id, int count);
 
 /** インベントリのアイテムを売却 (買値の半額)。所持していない場合 false。 */
 bool rpg_shop_sell(int item_id, int count);
+
+/* ======================== スキル習得/忘却 ======================== */
+
+/** アクターがスキルを習得する (skill_id % 64 の bit マスクで管理)。 */
+void rpg_actor_learn_skill(int actor_id, int skill_id);
+/** アクターがスキルを忘れる。 */
+void rpg_actor_forget_skill(int actor_id, int skill_id);
+/** アクターがスキルを習得済みか確認する。 */
+bool rpg_actor_has_skill(int actor_id, int skill_id);
+
+/* ======================== HP/MP 回復 ======================== */
+
+/** HP を回復する (max_hp を超えない)。 */
+void rpg_actor_heal_hp(int actor_id, int amount);
+/** MP を回復する (max_mp を超えない)。 */
+void rpg_actor_heal_mp(int actor_id, int amount);
 
 /* ======================== 状態異常 ======================== */
 

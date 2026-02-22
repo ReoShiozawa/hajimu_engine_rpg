@@ -102,3 +102,16 @@ int rpg_inventory_count(int item_id) {
     return 0;
 }
 bool rpg_inventory_has(int item_id) { return rpg_inventory_count(item_id) > 0; }
+
+int rpg_inventory_list(int* out_item_ids, int* out_counts, int max) {
+    if (!out_item_ids || !out_counts || max <= 0) return 0;
+    int n = 0;
+    for (int i = 0; i < RPG_MAX_INVENTORY && n < max; ++i) {
+        if (g_inv[i].item_id != 0 && g_inv[i].count > 0) {
+            out_item_ids[n] = g_inv[i].item_id;
+            out_counts[n]   = g_inv[i].count;
+            n++;
+        }
+    }
+    return n;
+}
