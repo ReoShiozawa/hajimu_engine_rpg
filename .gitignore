@@ -1,4 +1,5 @@
-build/
+build/*
+!build/*.hjp
 *.dSYM/
 .DS_Store
 cmake_install.cmake
