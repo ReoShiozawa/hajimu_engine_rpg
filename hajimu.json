@@ -1,0 +1,9 @@
+{
+  "name": "engine_rpg",
+  "version": "1.0.0",
+  "description": "はじむ言語用RPGエンジン (バトル/DB/ダイアログ/セーブ)",
+  "author": "Reo Shiozawa",
+  "license": "MIT",
+  "entry": "engine_rpg.hjp",
+  "dependencies": []
+}
