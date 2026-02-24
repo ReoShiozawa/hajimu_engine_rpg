@@ -4,6 +4,7 @@
   "description": "はじむ言語用RPGエンジン (バトル/DB/ダイアログ/セーブ)",
   "author": "Reo Shiozawa",
   "license": "MIT",
-  "entry": "engine_rpg.hjp",
-  "dependencies": []
+  "entry": "build/engine_rpg.hjp",
+  "dependencies": [],
+  "ビルド": "make build/engine_rpg.hjp"
 }
