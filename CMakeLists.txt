@@ -4,7 +4,16 @@ project(engine_rpg C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(HAJIMU_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../../jp/include")
+# CI / コマンドラインから -DHAJIMU_INCLUDE_DIR=... で上書き可能
+if(NOT HAJIMU_INCLUDE_DIR)
+    if(EXISTS "${CMAKE_SOURCE_DIR}/../../jp/include/hajimu_plugin.h")
+        set(HAJIMU_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../../jp/include")
+    elseif(EXISTS "/usr/local/include/hajimu/hajimu_plugin.h")
+        set(HAJIMU_INCLUDE_DIR "/usr/local/include/hajimu")
+    else()
+        set(HAJIMU_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
+    endif()
+endif()
 message(STATUS "HAJIMU_INCLUDE_DIR = ${HAJIMU_INCLUDE_DIR}")
 
 add_library(engine_rpg SHARED

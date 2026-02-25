@@ -6,5 +6,6 @@
   "license": "MIT",
   "entry": "build/engine_rpg.hjp",
   "dependencies": [],
+  "repository": "https://github.com/ReoShiozawa/hajimu_engine_rpg",
   "ビルド": "make build/engine_rpg.hjp"
 }
