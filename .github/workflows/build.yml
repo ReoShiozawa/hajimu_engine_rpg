@@ -2,7 +2,10 @@ name: Build & Release engine_rpg
 
 on:
   push:
+    branches: [main]
     tags: ['v*']
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -62,6 +65,12 @@ jobs:
         run: |
           mkdir -p dist
           cp build/engine_rpg.hjp dist/engine_rpg-${{ matrix.suffix }}.hjp
+
+      - name: CI アーティファクト保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: engine_rpg-${{ matrix.suffix }}
+          path: dist/
 
       - name: GitHub Releases にアップロード
         uses: softprops/action-gh-release@v2
