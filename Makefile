@@ -51,3 +51,37 @@ else
 	rm -rf $(INSTALL_DIR)/$(PLUGIN_NAME)
 endif
 	@echo "  アンインストール完了"
+
+# ── クロスプラットフォームビルド (macOS ホストでビルドして配布) ──
+DIST        = dist
+JP_CMAKE    = $(abspath $(firstword $(wildcard ../../jp/cmake ../jp/cmake)))
+HAJIMU_INC  = $(abspath $(firstword $(wildcard ../../jp/include ../jp/include ./include)))
+LINUX_TC    = $(JP_CMAKE)/toolchain_linux_x64.cmake
+WIN_TC      = $(JP_CMAKE)/toolchain_windows_x64.cmake
+CROSS_FLAGS = -DCMAKE_BUILD_TYPE=Release -Wno-dev -DHAJIMU_INCLUDE_DIR=$(HAJIMU_INC)
+
+.PHONY: build-all build-macos build-linux build-windows
+
+build-all: build-macos build-linux build-windows
+	@echo "  全プラットフォームビルド完了: $(DIST)/"
+
+build-macos:
+	@mkdir -p $(DIST)
+	cmake -S . -B build_macos $(CROSS_FLAGS)
+	cmake --build build_macos -j$(NCPU)
+	cp build_macos/$(PLUGIN_NAME).hjp $(DIST)/$(PLUGIN_NAME)-macos.hjp
+	@echo "  macOS: $(DIST)/$(PLUGIN_NAME)-macos.hjp"
+
+build-linux:
+	@mkdir -p $(DIST)
+	cmake -S . -B build_linux $(CROSS_FLAGS) -DCMAKE_TOOLCHAIN_FILE=$(LINUX_TC)
+	cmake --build build_linux -j$(NCPU)
+	cp build_linux/$(PLUGIN_NAME).hjp $(DIST)/$(PLUGIN_NAME)-linux-x64.hjp
+	@echo "  Linux: $(DIST)/$(PLUGIN_NAME)-linux-x64.hjp"
+
+build-windows:
+	@mkdir -p $(DIST)
+	cmake -S . -B build_win $(CROSS_FLAGS) -DCMAKE_TOOLCHAIN_FILE=$(WIN_TC)
+	cmake --build build_win -j$(NCPU)
+	cp build_win/$(PLUGIN_NAME).hjp $(DIST)/$(PLUGIN_NAME)-windows-x64.hjp
+	@echo "  Windows: $(DIST)/$(PLUGIN_NAME)-windows-x64.hjp"

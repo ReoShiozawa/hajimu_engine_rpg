@@ -11,6 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#  include <direct.h>   /* _mkdir */
+#endif
 
 /* ── フラグ・変数 (線形探索ハッシュ) ─────────────────────*/
 typedef struct { char key[RPG_KEY_LEN]; bool  val; bool used; } FlagEntry;
