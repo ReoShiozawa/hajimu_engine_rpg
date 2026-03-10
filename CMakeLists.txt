@@ -38,5 +38,5 @@ set_target_properties(engine_rpg PROPERTIES
     OUTPUT_NAME "engine_rpg"
     SUFFIX ".hjp"
     PREFIX ""
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
 )
