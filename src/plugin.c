@@ -358,6 +358,8 @@ static HajimuPluginFunc funcs[] = {
     FN(ノベルログテキスト,     1, 1),
 };
 
+HAJIMU_PLUGIN_ABI_EXPORT()
+
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_rpg",
